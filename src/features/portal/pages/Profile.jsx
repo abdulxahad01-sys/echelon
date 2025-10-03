@@ -77,12 +77,8 @@ function Profile() {
   const fetchProfileUser = async () => {
     if (!targetUserId) return;
     try {
-      if (isOwnProfile) {
-        setProfileUser(profile);
-      } else {
-        const userProfile = await profileService.fetchUserProfile(targetUserId);
-        setProfileUser(userProfile);
-      }
+      const userProfile = await profileService.fetchUserProfile(targetUserId);
+      setProfileUser(userProfile);
     } catch (error) {
       console.error('Error loading profile:', error);
       setProfileUser(null);
@@ -147,6 +143,7 @@ function Profile() {
   const handleProfileUpdate = () => {
     fetchUserPosts();
     fetchFollowStats();
+    fetchProfileUser();
   };
 
 
