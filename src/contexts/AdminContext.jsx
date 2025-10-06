@@ -76,6 +76,7 @@ export const AdminProvider = ({ children }) => {
       setUsers(prev => prev.filter(u => u.id !== userId));
       toast.success('User deleted successfully');
     } catch (err) {
+      console.error('Error deleting user:', err);
       setError(err.message);
       toast.error('Failed to delete user');
     }

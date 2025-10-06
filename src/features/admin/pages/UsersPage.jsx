@@ -16,20 +16,23 @@ function UsersPage() {
     loadUsers();
   }, [loadUsers]);
 
-  const handleBanUser = (reason, duration) => {
+  const handleBanUser = async (reason, duration) => {
     if (selectedUser) {
-      banUser(selectedUser.id, reason, duration);
+      await banUser(selectedUser.id, reason, duration);
+      loadUsers();
     }
   };
 
-  const handleDeleteUser = (reason) => {
+  const handleDeleteUser = async (reason) => {
     if (selectedUser) {
-      deleteUser(selectedUser.id, reason);
+      await deleteUser(selectedUser.id, reason);
+      loadUsers();
     }
   };
 
-  const handleUnbanUser = (userId) => {
-    unbanUser(userId);
+  const handleUnbanUser = async (userId) => {
+    await unbanUser(userId);
+    loadUsers();
   };
 
   if (isLoading) {
@@ -137,6 +140,7 @@ function UsersPage() {
         onClose={() => {
           setBanDialogOpen(false);
           setSelectedUser(null);
+          loadUsers();
         }}
         onConfirm={handleBanUser}
         user={selectedUser}
@@ -147,6 +151,7 @@ function UsersPage() {
         onClose={() => {
           setDeleteDialogOpen(false);
           setSelectedUser(null);
+          loadUsers();
         }}
         onConfirm={handleDeleteUser}
         user={selectedUser}

@@ -56,7 +56,7 @@ function AuditLogsPage() {
               </div>
               <div className="grid grid-cols-2 gap-3 text-xs sm:text-sm">
                 <div>
-                  <h1 className="text-[#E6D2A2] font-['Jost']">Actor</h1>
+                  <h1 className="text-[#E6D2A2] font-['Jost']">From</h1>
                   <h1 className="text-white font-['Jost'] truncate">{log.actor?.full_name || 'System'}</h1>
                 </div>
                 <div>
@@ -97,7 +97,7 @@ function AuditLogsPage() {
                   </div>
                 </div>
                 <div className="flex-1 py-4 px-3">
-                  <h1 className="text-[#E6D2A2] font-['Jost'] text-sm">Actor</h1>
+                  <h1 className="text-[#E6D2A2] font-['Jost'] text-sm">From</h1>
                   <h1 className="text-white font-['Jost'] truncate">{log.actor?.full_name || 'System'}</h1>
                 </div>
                 <div className="flex-1 py-4 px-3">

@@ -82,17 +82,17 @@ export const unbanUser = async (userId) => {
 };
 
 export const deleteUser = async (userId, reason) => {
-  const { data, error } = await supabase.rpc('admin_delete_user', {
-    p_user_id: userId,
-    p_reason: reason
-  });
-
+  // Delete user's posts first
+  await supabase.from('posts').delete().eq('author_id', userId);
+  
+  // Delete user's follows
+  await supabase.from('follows').delete().or(`follower_id.eq.${userId},following_id.eq.${userId}`);
+  
+  // Delete user profile
+  const { error } = await supabase.from('profiles').delete().eq('id', userId);
+  
   if (error) throw error;
-  if (!data || !data.success) {
-    throw new Error(data?.error || 'Failed to delete user');
-  }
-
-  return data;
+  return { success: true };
 };
 
 // Report Management
