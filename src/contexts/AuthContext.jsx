@@ -474,7 +474,7 @@ export const AuthProvider = ({ children }) => {
             console.warn("Auth initialization timeout, forcing completion");
             completeInitialization();
           }
-        }, 1500); // 15 second timeout
+        }, 5000); // 15 second timeout
 
         const {
           data: { session },
