@@ -35,8 +35,8 @@ function SigninPage() {
 
   // Redirect if already logged in
   useEffect(() => {
-    // Only redirect if we have all the data and subscription check is complete
-    if (user && !subscriptionLoading && profile && profile.navigate_to_portfolio !== undefined) {
+    // Only redirect if we have user and profile, and subscription check is complete
+    if (user && profile && !subscriptionLoading) {
       
       // Check if user is admin
       if (user.email === 'anthonytaye@gmail.com') {

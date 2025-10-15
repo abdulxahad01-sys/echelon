@@ -30,6 +30,8 @@ export const AuthProvider = ({ children }) => {
   const [navigateToPortfolio, setNavigateToPortfolio] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, title: "", message: "" });
   const [skipApiCheck, setSkipApiCheck] = useState(false);
+  const [isCheckingSubscription, setIsCheckingSubscription] = useState(false);
+  const [isProcessingAuth, setIsProcessingAuth] = useState(false);
 
   const signUp = async (email, password, fullName) => {
     try {
@@ -73,23 +75,7 @@ export const AuthProvider = ({ children }) => {
         email, password,
       });
       if (error) throw error;
-
-      // Update state immediately after successful login
-      if (data.user) {
-        setUser(data.user);
-        setSession(data.session);
-        setLoading(false);
-
-        // Fetch profile
-        const profile = await getProfile(data.user.id);
-        setProfile(profile);
-
-        // Check subscription status immediately with the current session
-        await checkSubscriptionWithSession(data.session, profile);
-
-        // Small delay to ensure state updates are reflected
-        setTimeout(() => {}, 50);
-      }
+      // Don't manually update state - let the auth listener handle it
     } catch (error) {
       console.error("Sign in error:", error);
       throw error;
@@ -291,7 +277,11 @@ export const AuthProvider = ({ children }) => {
     // If no profile, don't proceed with subscription check
     if (!profile) return;
 
+    // Prevent multiple simultaneous calls
+    if (isCheckingSubscription) return;
+
     try {
+      setIsCheckingSubscription(true);
       setSubscriptionLoading(true);
 
       let hasActiveTrial = false;
@@ -371,7 +361,10 @@ export const AuthProvider = ({ children }) => {
       setSubscriptionEnd(null);
       setIsTrialActive(false);
       setTrialDaysRemaining(0);
-    } finally { setSubscriptionLoading(false); }
+    } finally { 
+      setSubscriptionLoading(false);
+      setIsCheckingSubscription(false);
+    }
   };
 
   const checkSubscription = async () => {
@@ -509,24 +502,32 @@ export const AuthProvider = ({ children }) => {
       // For SIGNED_IN events during initialization, let initializeAuth handle it
       if (event === "SIGNED_IN" && loading) return;
 
-      setSession(session);
-      setUser(session?.user ?? null);
+      // Prevent double processing
+      if (isProcessingAuth) return;
 
-      if (session?.user) {
-        const profile = await getProfile(session.user.id);
-        setProfile(profile);
-        // Check subscription status when user logs in
-        await checkSubscriptionWithSession(session, profile);
-      } else {
-        setProfile(null);
-        setSubscribed(false);
-        setSubscriptionTier(null);
-        setSubscriptionEnd(null);
+      try {
+        setIsProcessingAuth(true);
+        setSession(session);
+        setUser(session?.user ?? null);
+
+        if (session?.user) {
+          const profile = await getProfile(session.user.id);
+          setProfile(profile);
+          // Check subscription status when user logs in
+          await checkSubscriptionWithSession(session, profile);
+        } else {
+          setProfile(null);
+          setSubscribed(false);
+          setSubscriptionTier(null);
+          setSubscriptionEnd(null);
+        }
+      } finally {
+        setIsProcessingAuth(false);
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [loading]);
+  }, [loading, isProcessingAuth]);
 
   const closeModal = () => {
     setModal({ isOpen: false, title: "", message: "" });
