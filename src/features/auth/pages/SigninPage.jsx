@@ -35,8 +35,8 @@ function SigninPage() {
 
   // Redirect if already logged in
   useEffect(() => {
-    // Only redirect if we have user and profile, and subscription check is complete
-    if (user && profile && !subscriptionLoading) {
+    // Only redirect if we have user and subscription check is complete
+    if (user && !subscriptionLoading) {
       
       // Check if user is admin
       if (user.email === 'anthonytaye@gmail.com') {
@@ -44,12 +44,10 @@ function SigninPage() {
         return;
       }
       
-      // Use navigate_to_portfolio to determine redirect destination
-      if (profile.navigate_to_portfolio) navigate("/portal", { replace: true });
-      else navigate("/membership", { replace: true });
-      
+      // For normal users, redirect to portal
+      navigate("/portal", { replace: true });
     } 
-  }, [user, profile, subscriptionLoading, navigate]);
+  }, [user, subscriptionLoading, navigate]);
 
   // Handle input changes
   const handleInputChange = (e) => {
