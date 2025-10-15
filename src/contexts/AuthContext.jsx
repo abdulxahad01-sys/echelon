@@ -11,9 +11,8 @@ const AuthContext = createContext(undefined);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within AuthProvider");
-  }
+  if (!context) { throw new Error("useAuth must be used within AuthProvider"); }
+
   return context;
 };
 
@@ -38,9 +37,7 @@ export const AuthProvider = ({ children }) => {
         email,
         password,
         options: {
-          data: {
-            full_name: fullName,
-          },
+          data: { full_name: fullName, },
         },
       });
       if (error) throw error;
@@ -54,18 +51,14 @@ export const AuthProvider = ({ children }) => {
   const getProfile = async (userId) => {
     try {
       const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", userId)
-        .single();
+        .from("profiles").select("*").eq("id", userId).single();
 
       if (error) {
         console.error("Error fetching profile:", error);
         return null;
       }
 
-      if (data && data.navigate_to_portfolio === undefined)
-        data.navigate_to_portfolio = false;
+      if (data && data.navigate_to_portfolio === undefined) data.navigate_to_portfolio = false;
 
       return data;
     } catch (error) {
@@ -77,8 +70,7 @@ export const AuthProvider = ({ children }) => {
   const signIn = async (email, password) => {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+        email, password,
       });
       if (error) throw error;
 
@@ -118,9 +110,7 @@ export const AuthProvider = ({ children }) => {
 
       const { error } = await supabase.auth.signOut();
       if (error) console.error("Sign out error:", error);
-    } catch (error) {
-      console.error("Error in signOut:", error);
-    }
+    } catch (error) { console.error("Error in signOut:", error); }
   };
 
   const startTrial = async () => {
@@ -146,11 +136,7 @@ export const AuthProvider = ({ children }) => {
       try {
         const { data, error } = await supabase.functions.invoke(
           "create-trial-checkout",
-          {
-            headers: {
-              Authorization: `Bearer ${session.access_token}`,
-            },
-          }
+          { headers: { Authorization: `Bearer ${session.access_token}`, }, }
         );
 
         if (error) {
@@ -166,18 +152,11 @@ export const AuthProvider = ({ children }) => {
         window.open(data.url, "_blank");
         return;
       } catch (e) {
-        console.error(
-          "Trial checkout function not available, falling back to regular checkout",
-          e
-        );
+        console.error("Trial checkout function not available, falling back to regular checkout", e);
 
         const { data, error } = await supabase.functions.invoke(
           "create-checkout",
-          {
-            headers: {
-              Authorization: `Bearer ${session.access_token}`,
-            },
-          }
+          { headers: { Authorization: `Bearer ${session.access_token}`, }, }
         );
 
         if (error) {
@@ -201,8 +180,7 @@ export const AuthProvider = ({ children }) => {
         setModal({
           isOpen: true,
           title: "Service Temporarily Unavailable",
-          message:
-            "The trial service is currently unavailable. Please try again later or contact support.",
+          message: "The trial service is currently unavailable. Please try again later or contact support.",
         });
       } else {
         setModal({
@@ -227,11 +205,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const { data, error } = await supabase.functions.invoke(
         "create-checkout",
-        {
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${session.access_token}`, }, }
       );
 
       if (error) {
@@ -254,8 +228,7 @@ export const AuthProvider = ({ children }) => {
         setModal({
           isOpen: true,
           title: "Service Temporarily Unavailable",
-          message:
-            "The checkout service is currently unavailable. Please try again later or contact support.",
+          message: "The checkout service is currently unavailable. Please try again later or contact support.",
         });
       } else {
         setModal({
@@ -280,38 +253,26 @@ export const AuthProvider = ({ children }) => {
     try {
       const { data, error } = await supabase.functions.invoke(
         "customer-portal",
-        {
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${session.access_token}`, }, }
       );
 
       if (error) throw error;
 
-      if (data?.url) {
-        window.open(data.url, "_blank");
-      } else {
-        throw new Error("No portal URL received");
-      }
+      if (data?.url) { window.open(data.url, "_blank"); } 
+      else { throw new Error("No portal URL received"); }
     } catch (error) {
       console.error("Error managing subscription:", error);
-      if (
-        error.message?.includes("500") ||
-        error.message?.includes("Internal Server Error")
-      ) {
+      if (error.message?.includes("500") || error.message?.includes("Internal Server Error") ) {
         setModal({
           isOpen: true,
           title: "Service Temporarily Unavailable",
-          message:
-            "The customer portal service is currently unavailable. Please try again later or contact support.",
+          message: "The customer portal service is currently unavailable. Please try again later or contact support.",
         });
       } else {
         setModal({
           isOpen: true,
           title: "Service Unavailable",
-          message:
-            "Stripe customer portal not configured. Please contact support.",
+          message: "Stripe customer portal not configured. Please contact support.",
         });
       }
     }
@@ -339,20 +300,14 @@ export const AuthProvider = ({ children }) => {
       // Check if user has an active trial
       if (profile?.trial_started_at && !profile?.trial_ended_at) {
         const trialStart = new Date(profile.trial_started_at);
-        const trialEnd = new Date(
-          trialStart.getTime() + 3 * 24 * 60 * 60 * 1000
-        ); // 3 days
+        const trialEnd = new Date(trialStart.getTime() + 3 * 24 * 60 * 60 * 1000); // 3 days
         const now = new Date();
 
         if (now < trialEnd) {
           // Trial is still active
           hasActiveTrial = true;
           setIsTrialActive(true);
-          setTrialDaysRemaining(
-            Math.ceil(
-              (trialEnd.getTime() - now.getTime()) / (24 * 60 * 60 * 1000)
-            )
-          );
+          setTrialDaysRemaining(Math.ceil( (trialEnd.getTime() - now.getTime()) / (24 * 60 * 60 * 1000)));
           setSubscribed(true); // Give full access during trial
           setSubscriptionTier("trial");
           setSubscriptionEnd(trialEnd.toISOString());
@@ -370,11 +325,7 @@ export const AuthProvider = ({ children }) => {
       // Always check regular subscription (user might have both trial and subscription)
       const { data, error } = await supabase.functions.invoke(
         "check-subscription",
-        {
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-          },
-        }
+        {headers: { Authorization: `Bearer ${session.access_token}`,},}
       );
 
       if (error) {
@@ -399,10 +350,7 @@ export const AuthProvider = ({ children }) => {
       // Always update local state first
       setNavigateToPortfolio(shouldNavigateToPortfolio);
 
-      if (
-        profile &&
-        profile.navigate_to_portfolio !== shouldNavigateToPortfolio
-      ) {
+      if ( profile && profile.navigate_to_portfolio !== shouldNavigateToPortfolio ) {
         await supabase
           .from("profiles")
           .update({ navigate_to_portfolio: shouldNavigateToPortfolio })
@@ -423,9 +371,7 @@ export const AuthProvider = ({ children }) => {
       setSubscriptionEnd(null);
       setIsTrialActive(false);
       setTrialDaysRemaining(0);
-    } finally {
-      setSubscriptionLoading(false);
-    }
+    } finally { setSubscriptionLoading(false); }
   };
 
   const checkSubscription = async () => {
@@ -437,9 +383,7 @@ export const AuthProvider = ({ children }) => {
 
     try {
       const { error } = await supabase
-        .from("profiles")
-        .update(updates)
-        .eq("id", user.id);
+        .from("profiles").update(updates).eq("id", user.id);
 
       if (error) throw error;
 
@@ -474,7 +418,7 @@ export const AuthProvider = ({ children }) => {
             console.warn("Auth initialization timeout, forcing completion");
             completeInitialization();
           }
-        }, 5000); // 15 second timeout
+        }, 15000); // 15 second timeout
 
         const {
           data: { session },
@@ -634,9 +578,7 @@ export const AuthProvider = ({ children }) => {
 
     try {
       const now = new Date().toISOString();
-      const trialEnd = new Date(
-        Date.now() + 3 * 24 * 60 * 60 * 1000
-      ).toISOString();
+      const trialEnd = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString();
 
       // Force update subscribers table
       await supabase
@@ -675,9 +617,7 @@ export const AuthProvider = ({ children }) => {
 
     try {
       const now = new Date().toISOString();
-      const trialEnd = new Date(
-        Date.now() + 3 * 24 * 60 * 60 * 1000
-      ).toISOString();
+      const trialEnd = new Date( Date.now() + 3 * 24 * 60 * 60 * 1000 ).toISOString();
 
       // Update profiles table
       const { error: profileError } = await supabase
@@ -720,8 +660,7 @@ export const AuthProvider = ({ children }) => {
       setModal({
         isOpen: true,
         title: "Trial Activated!",
-        message:
-          "Your 3-day free trial has been activated successfully. You can now access the portal!",
+        message: "Your 3-day free trial has been activated successfully. You can now access the portal!",
       });
     } catch (error) {
       console.error("Error activating trial:", error);
